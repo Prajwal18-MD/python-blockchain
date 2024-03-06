@@ -1,4 +1,4 @@
-from blockchain.backend.util.util import hash256
+from Blockchain.Backend.util.util import hash256
 class BlockHeader:
     def  __init__(self, version, prevBlockHash, merkleRoot, timestamp, bits):
         self.version = version
@@ -6,7 +6,7 @@ class BlockHeader:
         self.merkleRoot = merkleRoot
         self.timestamp = timestamp
         self.bits = bits
-        self.nonce = '0'
+        self.nonce = 0
         self.blockHash =''
         
     def mine(self):

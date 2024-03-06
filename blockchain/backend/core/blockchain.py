@@ -1,11 +1,12 @@
 import sys
-sys.path.append('/blockchain')
+sys.path.append('/Bitcoin')
 
-from blockchain.backend.core.block import Block
-from blockchain.backend.core.blockheader import BlockHeader
-from blockchain.backend.util.util import hash256
+from Blockchain.Backend.core.block import Block
+from Blockchain.Backend.core.blockheader import BlockHeader
+from Blockchain.Backend.util.util import hash256
 import time
 import json
+
 
 ZERO_HASH = '0' * 64
 VERSION = 1
