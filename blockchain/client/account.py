@@ -1,7 +1,8 @@
 import sys
+import hashlib
 sys.path.append('/Bitcoin')
-from Blockchain.Backend.core.EllepticCurve.EllepticCurve import Sha256Point
 from Blockchain.Backend.util.util import hash160
+from Blockchain.Backend.core.EllepticCurve.EllepticCurve import Sha256Point
 import secrets
 
 class account:
@@ -27,7 +28,7 @@ class account:
         main_prefix = b'\x00'
         
         newAddr = main_prefix + hsh160
-        checksum = hash256(newAddr)[:4]
+        checksum = hashlib.sha256(hashlib.sha256(newAddr).digest()).digest()[:4]
         newAddr = newAddr + checksum
         BASE58_ALPHABET = '123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
         
