@@ -1,4 +1,11 @@
 from Blockchain.Backend.core.Script import Script
+from Blockchain.Backend.util.util import int_to_little_endian , bytes_needed
+
+class CoinbaseTx:
+    def __init__(self, BlockHeight):
+        self.BlockHeightInLittleEndian = int_to_little_endian(BlockHeight , bytes_needed(BlockHeight))
+
+
 class Tx:
     def __init__(self, version, tx_ins, tx_outs, locktime):
         self.version = version
