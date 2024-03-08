@@ -1,11 +1,11 @@
 from Blockchain.Backend.core.Script import Script
-from Blockchain.Backend.util.util import int_to_little_endian , bytes_needed, decode_base58
+from Blockchain.Backend.util.util import int_to_little_endian , bytes_needed, decode_base58, little_endian_to_int
 
 ZERO_HASH = b'\0' * 32
 REWARD = 50
 
-PRIVATE_KEY ='12581684044841109582091767466139305449310332399343515549215786231514462660173'
-MINER_ADDRESS = '14XYBAcqUPMKCN65eI4VFNCLShVlF7bl4Z'
+PRIVATE_KEY ='87824984433795153810205892141993976748789892306851489104848113489798497867060'
+MINER_ADDRESS = '15e7PdtntJENNDSnZknfbcyAXz6QoGWZu4'
 
 class CoinbaseTx:
     def __init__(self, BlockHeight):
@@ -53,7 +53,17 @@ class Tx:
         
         if self.is_coinbase():
             self.tx_ins[0].prev_tx = self.tx_ins[0].prev_tx.hex()
-            
+            self.tx_ins[0].script_sig.cmds[0] = little_endian_to_int(self.tx_ins[0].script_sig.cmds[0])
+            self.tx_ins[0].script_sig = self.tx_ins[0].script_sig.__dict__
+        
+        self.tx_ins[0] = self.tx_ins[0].__dict__
+        
+        
+        self.tx_outs[0].script_pubkey.cmds[2] = self.tx_outs[0].script_pubkey.cmds[2] .hex()
+        self.tx_outs[0].script_pubkey = self.tx_outs[0].script_pubkey.__dict__
+        self.tx_outs[0] = self.tx_outs[0].__dict__
+        
+        return self.__dict__
           
         
 class TxIn:

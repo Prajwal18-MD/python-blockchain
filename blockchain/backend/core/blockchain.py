@@ -21,6 +21,7 @@ class Blockchain:
         blockchainDB = BlockchainDB()
         blockchainDB.write(block)
         
+        
     def fetch_last_block(self):
         blockchainDB = BlockchainDB()
         return blockchainDB.lastBlock()

@@ -19,6 +19,9 @@ def bytes_needed(n):
 def int_to_little_endian(n, length):
     return n.to_bytes(length, 'little')
 
+def little_endian_to_int(b):
+    return int.from_bytes(b, 'little')
+
 def decode_base58(s):
     num = 0
     

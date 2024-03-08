@@ -29,7 +29,7 @@ class account:
         newAddr = main_prefix + hsh160
         checksum = hash256(newAddr)[:4]
         newAddr = newAddr + checksum
-        BASE58_ALPHABET = '123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+        BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
         
         count = 0
         
