@@ -36,7 +36,7 @@ class Blockchain:
         timestamp = int(time.time())
         coinbaseInstance = CoinbaseTx(BlockHeight)
         coinbaseTx = coinbaseInstance.CoinbaseTransaction()
-        merkelRoot = ''
+        merkelRoot = coinbaseTx.TxId
         bits = 'ffff001f'
         blockheader = BlockHeader(VERSION, prevBlockHash, merkelRoot, timestamp, bits)
         blockheader.mine()
