@@ -15,7 +15,7 @@ VERSION = 1
 
 class Blockchain:
     def __init__(self):
-        self.GenesisBlock()
+        pass
         
     def write_on_disk(self, block):
         blockchainDB = BlockchainDB()
@@ -44,6 +44,10 @@ class Blockchain:
         
         
     def main(self):
+        lastBlock = self.fetch_last_block()
+        if lastBlock is None:
+            self.GenesisBlock()
+       
         while True:
             lastBlock = self.fetch_last_block()
             BlockHeight = lastBlock["Height"] + 1
