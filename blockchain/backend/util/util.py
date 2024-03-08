@@ -2,6 +2,7 @@ import hashlib
 from Crypto.Hash import RIPEMD160
 from hashlib import sha256
 from math import log
+from Blockchain.Backend.core.EllepticCurve.EllepticCurve import BASE58_ALPHABET
 
 def hash256(s):
     return  hashlib.sha256(hashlib.sha256(s).digest()).digest()
@@ -17,3 +18,18 @@ def bytes_needed(n):
 
 def int_to_little_endian(n, length):
     return n.to_bytes(length, 'little')
+
+def decode_base58(s):
+    num = 0
+    
+    for c in s:
+        num *= 58
+        num += BASE58_ALPHABET.index(c)
+        
+    combined = num.to_bytes(25, byteorder = 'big')
+    checksum = combined[-4:]
+    
+    if hash256(combined[:-4])[:4] != checksum:
+        raise ValueError (f'improper address {checksum} {hash256(combined[:-4][:4])}')
+    
+    return combined[1:-4]
