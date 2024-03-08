@@ -1,5 +1,5 @@
 from Blockchain.Backend.core.Script import Script
-from Blockchain.Backend.util.util import int_to_little_endian , bytes_needed, decode_base58, little_endian_to_int
+from Blockchain.Backend.util.util import int_to_little_endian , bytes_needed, decode_base58, little_endian_to_int, encode_varint
 
 ZERO_HASH = b'\0' * 32
 REWARD = 50
@@ -34,6 +34,13 @@ class Tx:
         self.tx_ins = tx_ins  
         self.tx_outs = tx_outs
         self.locktime = locktime
+        
+    def serialize(self):
+        result = int_to_little_endian(self.version, 4)
+        result += encode_varint(len(self.tx_ins))
+
+        for tx_in in self.tx_ins:
+            result += tx_in.serialize()
         
     def is_coinbase(self):
         if len(self.tx_ins) != 1 :
@@ -78,6 +85,14 @@ class TxIn:
         
         
         self.sequence = sequence
+        
+    def serialize(self):
+        result = self.prev_tx[::-1]
+        result +=  int_to_little_endian(self.prev_index, 4)
+        result + self.script_sig
+        result += int_to_little_endian(self.sequence , 4)
+        return result
+    
         
 class TxOut:
     def __init__(self, amount, script_pubkey):
