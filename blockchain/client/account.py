@@ -50,9 +50,9 @@ class account:
             result = BASE58_ALPHABET[mod] + result
             
             
-        PublicAdress = prefix + result
+        PublicAddress = prefix + result
         
-        print(f"The public address is : {PublicAdress}")
+        print(f"The public address is : {PublicAddress}")
         print(f"Private Key is{privateKey}")
         
             
