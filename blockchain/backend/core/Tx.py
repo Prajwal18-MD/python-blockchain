@@ -58,6 +58,12 @@ class Tx:
         result += int_to_little_endian(self.locktime, 4)
         
         return result
+    
+    def sigh_hash(self, input_index, script_pubkey):
+        pass
+    
+    def sign_input(self, input_index, private_key, script_pubkey):
+        z = self.sigh_hash(input_index, script_pubkey)
         
     def is_coinbase(self):
         if len(self.tx_ins) != 1 :
