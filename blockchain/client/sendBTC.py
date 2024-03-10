@@ -1,6 +1,8 @@
 from Blockchain.Backend.util.util import decode_base58
 from Blockchain.Backend.core.Script import Script
 from Blockchain.Backend.core.Tx import Tx, TxIn, TxOut
+from Blockchain.Backend.core.database.database import AccountDB
+from Blockchain.Backend.core.EllepticCurve.EllepticCurve import PrivateKey
 import time
 
 class SendBTC:
@@ -15,6 +17,12 @@ class SendBTC:
         h160 = decode_base58(PublicAddress)
         script_pubkey = Script().p2pkh_script(h160)
         return script_pubkey
+    
+    def getPrivateKey(self):
+        AllAccounts = AccountDB().read()
+        for account in AllAccounts:
+            if account ['PublicAddress'] ==  self.FromPublicAddress :
+                return account['privateKey']
         
     def prepareTxIn(self):
         TxIns = []
@@ -43,6 +51,7 @@ class SendBTC:
                         TxIns.append(TxIn(prev_tx ,index))
             else:
                 break
+        self.isBalanceEnough = True
         
         if self.Total < self.Amount :
             self.isBalanceEnough = False
@@ -60,9 +69,24 @@ class SendBTC:
         self.changeAmount = self.Total - self.Amount - self.fee
         TxOuts.append(TxOut(self.changeAmount, self.From_address_script_pubkey))
         return TxOuts
+    
+    def signTx(self):
+        
+        secret = self.getPrivateKey()
+        priv = PrivateKey(secret= secret)
+        
+        for index, input in enumerate(self.TxIns):
+            self.TxObj.sign_input(index, priv, self.From_address_script_pubkey)
+        return True
         
         
     def prepareTransaction(self):
        self.TxIns = self.prepareTxIn()
-       self.TxOuts = self.prepareTxOut()
-       self.TxObj = Tx(1, self.TxIns, self.TxOuts, 0)
+       if self.isBalanceEnough:
+          self.TxOuts = self.prepareTxOut()
+          self.TxObj = Tx(1, self.TxIns, self.TxOuts, 0)
+          self.signTx()
+          return True
+      
+       else:
+           return False
