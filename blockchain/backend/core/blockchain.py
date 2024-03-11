@@ -6,6 +6,8 @@ from Blockchain.Backend.core.blockheader import BlockHeader
 from Blockchain.Backend.util.util import hash256
 from Blockchain.Backend.core.database.database import BlockchainDB
 from Blockchain.Backend.core.Tx import CoinbaseTx
+from multiprocessing import Process, Manager
+from Blockchain.Frontend.run import main
 import time
 
 
@@ -14,8 +16,8 @@ ZERO_HASH = '0' * 64
 VERSION = 1
 
 class Blockchain:
-    def __init__(self):
-        pass
+    def __init__(self , utxos):
+        self.utxos = utxos
         
     def write_on_disk(self, block):
         blockchainDB = BlockchainDB()
@@ -31,6 +33,11 @@ class Blockchain:
         BlockHeight = 0
         prevBlockHash = ZERO_HASH
         self.addBlock(BlockHeight, prevBlockHash)
+        
+    def store_uxtos_in_cache(self):
+        for tx in self.addTransactionsInBlock:
+            print(f"Transaction added {tx.TxId} ")
+            self.utxos[tx.TxId] = tx
     
     def addBlock(self, BlockHeight, prevBlockHash):
         timestamp = int(time.time())
@@ -40,6 +47,7 @@ class Blockchain:
         bits = 'ffff001f'
         blockheader = BlockHeader(VERSION, prevBlockHash, merkelRoot, timestamp, bits)
         blockheader.mine()
+        self.store_uxtos_in_cache(coinbaseTx)
         self.write_on_disk([Block(BlockHeight, 1, blockheader.__dict__, 1, coinbaseTx).__dict__])
         
         
@@ -55,5 +63,11 @@ class Blockchain:
             self.addBlock(BlockHeight,prevBlockHash)
         
 if __name__ == "__main__":
-    blockchain = Blockchain()
-    blockchain.main()
+    with Manager() as manager:
+        utxos = manager.dict()
+        
+        webapp = Process(target = main, args =(utxos))
+        webapp.start()
+        
+        blockchain = Blockchain(utxos)
+        blockchain.main()
