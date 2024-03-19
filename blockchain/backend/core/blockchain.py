@@ -40,16 +40,39 @@ class Blockchain:
             print(f"Transaction added {tx.TxId} ")
             self.utxos[tx.TxId] = tx
     
+    def read_transaction_from_memorypool(self):
+        self.Blocksize = 80
+        self.TxIds = []
+        self.addTransactionsInBlock = []
+        self.remove_spent_transactions = []
+        
+        for tx in self.MemPool:
+            self.TxIds.append(bytes.fromhex(tx))
+            self.addTransactionsInBlock.append(self.MemPool[tx])
+            self.Blocksize += len(self.MemPool[tx].serialize())
+
+            for spent in self.MemPool[tx].tx_ins:
+                self.remove_spent_transactions.append([spent.prev_tx, spent.prev_index])
+                
+    def convert_to_json(self):
+        self.TxJson = []
+        for tx in self.addTransactionsInBlock:
+            self.TxJson.append(tx.to_dict())
+    
     def addBlock(self, BlockHeight, prevBlockHash):
+        self.read_transaction_from_memorypool()
         timestamp = int(time.time())
         coinbaseInstance = CoinbaseTx(BlockHeight)
         coinbaseTx = coinbaseInstance.CoinbaseTransaction()
+        self.TxIds.insert(0, coinbaseTx.TxId)
+        self.addTransactionsInBlock.insert(0, coinbaseTx)
         merkelRoot = coinbaseTx.TxId
         bits = 'ffff001f'
         blockheader = BlockHeader(VERSION, prevBlockHash, merkelRoot, timestamp, bits)
         blockheader.mine()
         self.store_uxtos_in_cache(coinbaseTx)
-        self.write_on_disk([Block(BlockHeight, 1, blockheader.__dict__, 1, coinbaseTx).__dict__])
+        self.convert_to_json()
+        self.write_on_disk([Block(BlockHeight, 1, blockheader.__dict__, 1, self.TxJson).__dict__])
         
         
     def main(self):
