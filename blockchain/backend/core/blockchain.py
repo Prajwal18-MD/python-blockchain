@@ -39,6 +39,19 @@ class Blockchain:
         for tx in self.addTransactionsInBlock:
             print(f"Transaction added {tx.TxId} ")
             self.utxos[tx.TxId] = tx
+            
+    def remove_spent_Transactions(self):
+        for txId_index in self.remove_spent_transactions:
+            if txId_index[0].hex() in self.utxos:
+
+                if len(self.utxos[txId_index[0].hex()].tx_outs) < 2:
+                    print(f" Spent Transaction removed {txId_index[0].hex()} ")
+                    del self.utxos[txId_index[0].hex()]
+                else:
+                    prev_trans = self.utxos[txId_index[0].hex()]
+                    self.utxos[txId_index[0].hex()] = prev_trans.tx_outs.pop(
+                        txId_index[1]
+                    )
     
     def read_transaction_from_memorypool(self):
         self.Blocksize = 80
@@ -53,6 +66,11 @@ class Blockchain:
 
             for spent in self.MemPool[tx].tx_ins:
                 self.remove_spent_transactions.append([spent.prev_tx, spent.prev_index])
+    
+    def remove_transactions_from_memorypool(self):
+        for tx in self.TxIds:
+            if tx.hex() in self.MemPool:
+                del self.MemPool[tx.hex()]
                 
     def convert_to_json(self):
         self.TxJson = []
@@ -70,7 +88,9 @@ class Blockchain:
         bits = 'ffff001f'
         blockheader = BlockHeader(VERSION, prevBlockHash, merkelRoot, timestamp, bits)
         blockheader.mine()
-        self.store_uxtos_in_cache(coinbaseTx)
+        self.remove_spent_Transactions()
+        self.read_transaction_from_memorypool()
+        self.store_uxtos_in_cache()
         self.convert_to_json()
         self.write_on_disk([Block(BlockHeight, 1, blockheader.__dict__, 1, self.TxJson).__dict__])
         
