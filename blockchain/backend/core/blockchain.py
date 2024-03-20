@@ -3,7 +3,7 @@ sys.path.append('/Bitcoin')
 
 from Blockchain.Backend.core.block import Block
 from Blockchain.Backend.core.blockheader import BlockHeader
-from Blockchain.Backend.util.util import hash256
+from Blockchain.Backend.util.util import hash256, merkle_root
 from Blockchain.Backend.core.database.database import BlockchainDB
 from Blockchain.Backend.core.Tx import CoinbaseTx
 from multiprocessing import Process, Manager
@@ -64,9 +64,9 @@ class Blockchain:
         timestamp = int(time.time())
         coinbaseInstance = CoinbaseTx(BlockHeight)
         coinbaseTx = coinbaseInstance.CoinbaseTransaction()
-        self.TxIds.insert(0, coinbaseTx.TxId)
+        self.TxIds.insert(0, bytes.fromhex(coinbaseTx.TxId))
         self.addTransactionsInBlock.insert(0, coinbaseTx)
-        merkelRoot = coinbaseTx.TxId
+        merkelRoot = merkle_root(self.TxIds)[::-1].hex()
         bits = 'ffff001f'
         blockheader = BlockHeader(VERSION, prevBlockHash, merkelRoot, timestamp, bits)
         blockheader.mine()
