@@ -103,6 +103,7 @@ class Blockchain:
         timestamp = int(time.time())
         coinbaseInstance = CoinbaseTx(BlockHeight)
         coinbaseTx = coinbaseInstance.CoinbaseTransaction()
+        self.Blocksize +=  len(coinbaseTx.serialize())
         coinbaseTx.tx_outs[0].amount = coinbaseTx.tx_outs[0].amount +  self.fee
         self.TxIds.insert(0, bytes.fromhex(coinbaseTx.id()))
         self.addTransactionsInBlock.insert(0, coinbaseTx)
@@ -113,7 +114,7 @@ class Blockchain:
         self.read_transaction_from_memorypool()
         self.store_uxtos_in_cache()
         self.convert_to_json()
-        self.write_on_disk([Block(BlockHeight, 1, blockheader.__dict__, 1, self.TxJson).__dict__])
+        self.write_on_disk([Block(BlockHeight, self.Blocksize, blockheader.__dict__, 1, self.TxJson).__dict__])
         
         
     def main(self):
