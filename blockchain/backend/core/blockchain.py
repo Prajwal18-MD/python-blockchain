@@ -76,13 +76,32 @@ class Blockchain:
         self.TxJson = []
         for tx in self.addTransactionsInBlock:
             self.TxJson.append(tx.to_dict())
+            
+    def calculate_fee(self):
+        self.input_amount = 0
+        self.output_amount = 0
+        
+        for TxId_index in self.remove_spent_transactions:
+            if TxId_index[0].hex() in self.utxos:
+                self.input_amount += (
+                    self.utxos[TxId_index[0].hex()].tx_outs[TxId_index[1]].amount
+                )
+
+        
+        for tx in self.addTransactionsInBlock:
+            for tx_out in tx.tx_outs:
+                self.output_amount += tx_out.amount
+
+        self.fee = self.input_amount - self.output_amount
     
     def addBlock(self, BlockHeight, prevBlockHash):
         self.read_transaction_from_memorypool()
+        self.calculate_fee()
         timestamp = int(time.time())
         coinbaseInstance = CoinbaseTx(BlockHeight)
         coinbaseTx = coinbaseInstance.CoinbaseTransaction()
-        self.TxIds.insert(0, bytes.fromhex(coinbaseTx.TxId))
+        coinbaseTx.tx_outs[0].amount = coinbaseTx.tx_outs[0].amount +  self.fee
+        self.TxIds.insert(0, bytes.fromhex(coinbaseTx.id()))
         self.addTransactionsInBlock.insert(0, coinbaseTx)
         merkelRoot = merkle_root(self.TxIds)[::-1].hex()
         bits = 'ffff001f'
