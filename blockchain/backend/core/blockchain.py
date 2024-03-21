@@ -3,7 +3,7 @@ sys.path.append('/Bitcoin')
 
 from Blockchain.Backend.core.block import Block
 from Blockchain.Backend.core.blockheader import BlockHeader
-from Blockchain.Backend.util.util import hash256, merkle_root
+from Blockchain.Backend.util.util import hash256, merkle_root, target_to_bits
 from Blockchain.Backend.core.database.database import BlockchainDB
 from Blockchain.Backend.core.Tx import CoinbaseTx
 from multiprocessing import Process, Manager
@@ -14,11 +14,14 @@ import time
 
 ZERO_HASH = '0' * 64
 VERSION = 1
+INITIAL_TARGET = 0x0000FFFF00000000000000000000000000000000000000000000000000000000
 
 class Blockchain:
     def __init__(self , utxos, MemPool):
         self.utxos = utxos
         self.MemPool = MemPool
+        self.current_target = INITIAL_TARGET
+        self.bits = target_to_bits(INITIAL_TARGET)
         
     def write_on_disk(self, block):
         blockchainDB = BlockchainDB()
@@ -104,9 +107,8 @@ class Blockchain:
         self.TxIds.insert(0, bytes.fromhex(coinbaseTx.id()))
         self.addTransactionsInBlock.insert(0, coinbaseTx)
         merkelRoot = merkle_root(self.TxIds)[::-1].hex()
-        bits = 'ffff001f'
-        blockheader = BlockHeader(VERSION, prevBlockHash, merkelRoot, timestamp, bits)
-        blockheader.mine()
+        blockheader = BlockHeader(VERSION, prevBlockHash, merkelRoot, timestamp, self.bits)
+        blockheader.mine(self.current_target)
         self.remove_spent_Transactions()
         self.read_transaction_from_memorypool()
         self.store_uxtos_in_cache()
